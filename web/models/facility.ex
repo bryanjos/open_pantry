@@ -2,9 +2,8 @@ defmodule OpenPantry.Facility do
   use OpenPantry.Web, :model
   alias OpenPantry.Stock
   alias OpenPantry.CreditType
-  schema "facilities" do
+  schema "facilities" do # removed field :location, Geo.Point due to test issues/current non-usage, see https://github.com/bryanjos/geo/issues/65
     field :name, :string
-    field :location, Geo.Point
     field :address1, :string
     field :address2, :string
     field :city, :string
@@ -26,7 +25,7 @@ defmodule OpenPantry.Facility do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:name, :location, :address1, :address2, :city, :region, :postal_code, :max_occupancy, :square_meterage_storage])
+    |> cast(params, [:name, :address1, :address2, :city, :region, :postal_code, :max_occupancy, :square_meterage_storage])
     |> unique_constraint(:name)
     |> validate_required([:name])
   end
@@ -50,7 +49,7 @@ defmodule OpenPantry.Facility do
     food_stocks ++ [{"Meals", :meals, meal_stocks(facility)}]
   end
 
-  def meal_stocks(facility = %Facility{id: id}) do
+  def meal_stocks(%Facility{id: id}) do
     now = DateTime.utc_now
     from(stocks in Stock,
     where: stocks.arrival < ^now,
